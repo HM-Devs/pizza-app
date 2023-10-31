@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IIS;
 using Microsoft.EntityFrameworkCore;
+using Xunit.Sdk;
 
 namespace backend.Controllers
 {
@@ -35,24 +39,54 @@ namespace backend.Controllers
         // POST api/pizzavotes
         [Authorize]
         [HttpPost]
-        public async Task Post(PizzaVotes model)
+        public async Task<IActionResult> Post(PizzaVotes pizzaVotes)
         {
-            await _dbContext.AddAsync(model);
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                if (pizzaVotes != null)
+                {
+                    await _dbContext.AddAsync(pizzaVotes);
+                    await _dbContext.SaveChangesAsync();
+                    return CreatedAtAction("Get", new { id = pizzaVotes.Id }, pizzaVotes);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (Exception ex)
+            {
+                // probably a good idea to log the exception for debugging purposes :) 
+                var errorResponse = new
+                {
+                    Error = "An error occurred while processing the request.",
+                    Details = ex.Message 
+                };
+
+                return new ObjectResult(errorResponse)
+                {
+                    StatusCode = 500
+                };
+            }
         }
 
         // PUT api/pizzavotes/{email}
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(string id, PizzaVotes model)
+        public async Task<ActionResult> Put(string id, PizzaVotes pizzaVotes)
         {
-            var exists = await _dbContext.PizzaVotes.AnyAsync(f => f.Id == id);
-            if (!exists)
+            if(string.IsNullOrEmpty(id) || pizzaVotes == null)
             {
-                return NotFound();
+                return BadRequest("Invalid input data.");
             }
 
-            _dbContext.PizzaVotes.Update(model);
+            var existingRecord = await _dbContext.PizzaVotes.AnyAsync(f => f.Id == id);
+            if (!existingRecord)
+            {
+                return NotFound($"PizzaVotes with ID {id} not found.");
+            }
+
+            _dbContext.PizzaVotes.Update(pizzaVotes);
 
             await _dbContext.SaveChangesAsync();
 

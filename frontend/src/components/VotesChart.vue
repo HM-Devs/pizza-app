@@ -1,5 +1,5 @@
 <script>
-import { Bar } from 'vue-chartjs'
+import { Pie } from 'vue-chartjs'
 
 const TOP_N_VOTERS_TO_SHOW_ON_CHART = 10
 
@@ -11,7 +11,7 @@ function sortByStartDate(nextUser, currentUser) {
 }
 
 export default {
-  extends: Bar,
+  extends: Pie,
   props: { data: Array },
 
   watch: {

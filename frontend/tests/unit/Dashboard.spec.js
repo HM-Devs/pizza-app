@@ -30,7 +30,7 @@ describe('Dashboard.vue', () => {
         it('calls api.getAll', async () => {
             await mountComponent();
             // TODO: add an assertion
-            fail('Oh no an error')
+            expect(api.getAll).toHaveBeenCalledTimes(1);
         })
     })
     describe('addVote', () => {
@@ -51,7 +51,11 @@ describe('Dashboard.vue', () => {
             await component.vm.addVote(mockUserRecord.id, 'UP');
 
             // TODO: add an assertion
-            fail('Oh no another error')
+            // here we are checking to see if api.getById is being called exactly once as expected
+            // we should also assert here to check that api.getById is being called with the mockUserRecord.id as expected
+            // since it was what we are awaiting in line 51
+            expect(api.getById).toHaveBeenCalledTimes(1);
+            expect(api.getById).toHaveBeenCalledWith(mockUserRecord.id);
         })
     })
 })
